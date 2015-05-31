@@ -73,6 +73,12 @@ O script `debug.py` executa um depurador simples que permite inspecionar o progr
 $ python debug.py app.py
 ```
 
+É recomendável utilizar o [rlwrap](http://utopia.knoware.nl/~hlub/uck/rlwrap/#rlwrap) para ter uma linha de comando com histórico:
+
+```
+$ rlwrap python debug.py app.py
+```
+
 Os comandos implementados são:
 
 - `break N` para adicionar um ponto de parada na linha N;
