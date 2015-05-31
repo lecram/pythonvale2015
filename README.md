@@ -1,5 +1,11 @@
 # Usando Metaprogramação para Instrumentar Python com Python
 
+## Slides
+
+Os slides que utilizei na apresentação estão no arquivo `slides-short.pdf`. O arquivo `slides-full.pdf` é uma versão extendida, com alguns detalhes a mais e uma demo extra.
+
+## Código Fonte
+
 Este repositório contém o código fonte completo dos casos de uso mostrados na apresentação:
 
 - Grafo de Chamadas (`graph.py`)
@@ -11,7 +17,7 @@ Estes scripts recebem um programa Python como argumento. O arquivo `app.py` é o
 
 **Observação**: estes scripts são apenas demos educativas que têm o objetivo de ilustrar a utilidade das funções `sys.setprofile()` e `sys.settrace()`. Fiquem à vontade para extendê-los e transformá-los em algo útil.
 
-## Grafo de Chamadas
+### Grafo de Chamadas
 
 O script `graph.py` gera um grafo em formato [dot](http://www.graphviz.org/content/dot-language) representando as chamadas de funções ocorridas durante a execução do programa analisado.
 
@@ -25,7 +31,7 @@ Para gerar uma imagem do grafo, basta utilizar a ferramenta `dot` do [Graphviz](
 $ python graph.py app.py | dot -Tpng -o app_graph.png
 ```
 
-## Análise de Cobertura
+### Análise de Cobertura
 
 O script `cover.py` exibe o código fonte do programa analisado, colorindo as linhas executadas de verde e as demais de vermelho (isto só funciona em um terminal Unix):
 
@@ -39,7 +45,7 @@ $ python cover.py app.py
 $ python cover.py app.py | less -R
 ```
 
-## Perfilador
+### Perfilador
 
 O script `prof.py` exibe uma tabela das funções que mais utilizaram um recurso durante a execução do programa analisado. Por padrão, o recurso é tempo em segundos:
 
@@ -53,7 +59,7 @@ Pode-se usar o comando `column` para formatar melhor a tabela gerada:
 $ python prof.py app.py | column -t
 ```
 
-## Depurador
+### Depurador
 
 O script `debug.py` executa um depurador simples que permite inspecionar o programa analisado enquanto o mesmo é executado:
 
@@ -70,6 +76,6 @@ Os comandos implementados são:
 - `print EXPR` para imprimir o resultado da expressão dada no contexto atual;
 - `quit` para interromper a execução do programa e sair do depurador.
 
-# Licença
+## Licença
 
 Todo o código e documentação neste repositório estão em Domínio Público.
