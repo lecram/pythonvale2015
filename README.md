@@ -82,6 +82,10 @@ Os comandos implementados são:
 - `print EXPR` para imprimir o resultado da expressão dada no contexto atual;
 - `quit` para interromper a execução do programa e sair do depurador.
 
+### Demo Extra
+
+O código na pasta `extra` é só uma brincadeira que não deu tempo de apresentar :)
+
 ## Licença
 
 Todo o código e documentação neste repositório estão em Domínio Público.
