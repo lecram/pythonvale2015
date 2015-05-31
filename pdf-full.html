@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Python Vale</title>
+
+		<meta name="description" content="Usando Metaprogramação para Instrumentar Python com Python">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/white.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/magula.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+<section data-markdown data-separator="^\n---\n$" data-separator-vertical="^\n--\n">
+<script type="text/template">
+
+## Usando Metaprogramação para Instrumentar Python com Python
+
+# ...
+
+Marcel Rodrigues
+
+### 2015 - Python Vale
+
+---
+
+## Fatos
+
+1. Nenhum programa é perfeito. <!-- .element: class="fragment" data-fragment-index="1" -->
+2. Depurar código é mais difícil do que escrever código. <!-- .element: class="fragment" data-fragment-index="2" -->
+
+# ... <!-- .element: class="fragment" data-fragment-index="3" -->
+
+## Ideia <!-- .element: class="fragment" data-fragment-index="3" -->
+
+### Escrever código para depurar código! <!-- .element: class="fragment" data-fragment-index="4" -->
+
+---
+
+## Soluções Prontas
+
+- Análise Estática: PyLint, Pyflakes, ...
+- Cobertura de Código: coverage.py
+- Profiler: cProfile, line_profiler, ...
+- Depurador: pdb, pdb++, ipdb, ...
+- Outros: pycallgraph, ...
+
+---
+
+## Solução "Faça você mesmo"
+
+...
+
+### Vantagens
+
+- Menos dependência <!-- .element: class="fragment" data-fragment-index="1" -->
+- Mais flexibilidade <!-- .element: class="fragment" data-fragment-index="2" -->
+- Mais diversão! <!-- .element: class="fragment" data-fragment-index="3" -->
+
+---
+
+## Solução "Faça você mesmo"
+
+...
+
+### Técnicas
+
+- Metaprogramação
+- Instrumentação
+
+---
+
+## Metaprogramação
+
+> Criação de programas que têm outros programas como entrada/saída.
+
+*"Code as Data"* <!-- .element: class="fragment" data-fragment-index="1" -->
+
+--
+
+## Programação
+
+![](img/prog-user.png)
+
+--
+
+## Metaprogramação
+
+![](img/meta-prog-user.png)
+
+---
+
+## Instrumentação
+
+> Monitoramento da execução de um programa para coleta de informações.
+
+--
+
+## Instrumentação
+
+![](img/meta-inst-prog-user.png)
+
+---
+
+## Solução "Faça você mesmo"
+
+...
+
+### Ferramentas
+
+- Python <!-- .element: class="fragment" data-fragment-index="1" -->
+- e só! <!-- .element: class="fragment" data-fragment-index="2" -->
+
+---
+
+## Ferramentas do Python
+
+O módulo `sys` fornece:
+
+- Instrumentação via callbacks.
+- Dois níveis de instrumentação:
+  - nível de função;
+  - nível de linha.
+
+---
+
+## Instrumentação de Função
+
+`sys.setprofile(callback)`
+
+Define uma função a ser chamada nos seguintes eventos:
+- `call`
+- `return`
+- `c_call`
+- `c_return`
+- `c_exception`
+
+---
+
+## Instrumentação de Linha
+
+`sys.settrace(callback)`
+
+Define uma função a ser chamada nos seguintes eventos:
+- `call`
+- `return`
+- `line`
+- `exception`
+
+--
+
+## Função Callback
+
+Callbacks do tipo "trace" são substituídas pelo seu valor de retorno nos seguintes eventos:
+- `call`
+- `line`
+- `exception`
+
+---
+
+## Função Callback
+
+`callback(frame, event, arg)`
+
+- `frame`: informações sobre o frame em execução;
+- `event`: string indicando o tipo do evento;
+- `arg`: informação adicional sobre o evento.
+
+---
+
+## Função Callback
+
+| event         | arg                           |
+|---------------|-------------------------------|
+| "call"        | None                          |
+| "return"      | Object (*)                    |
+| "line"        | None                          |
+| "exception"   | (exception, value, traceback) |
+| "c_call"      | CFunction                     |
+| "c_return"    | CFunction                     |
+| "c_exception" | CFunction                     |
+
+(*) Valor a ser retornado.
+
+---
+
+## Objetos `Frame`
+
+| Atributo     | Tipo     | Alterável |
+|--------------|----------|-----------|
+| `f_back`     | Frame    | Não       |
+| `f_locals`   | Dict     | Não       |
+| `f_code`     | Code     | Não       |
+| `f_lasti`    | Int      | Não       |
+| `f_lineno`   | Int      | Sim       |
+| ...          | ...      | ...       |
+
+---
+
+## Objetos `Code`
+
+| Atributo         | Tipo     | Alterável |
+|------------------|----------|-----------|
+| `co_name`        | String   | Não       |
+| `co_filename`    | String   | Não       |
+| `co_firstlineno` | Int      | Não       |
+| `co_argcount`    | Int      | Não       |
+| `co_varnames`    | (String) | Não       |
+| `co_code`        | String   | Não       |
+| ...              | ...      | ...       |
+
+---
+
+## Casos de Uso
+
+- **Grafo de Chamadas** **⇦** <!-- .element: style="color:red" -->
+- Análise de Cobertura
+- Profiler (perfilador)
+- Depurador
+
+---
+
+## Grafo de Chamadas
+
+...
+
+**OBJETIVO**: visualizar de onde as funções são chamadas.
+
+![](img/wtc.png)
+![](img/wtcg.png)
+
+---
+
+## Contexto para Instrumentar Funções
+
+```
+def __enter__(self):
+  self.old_cb = sys.getprofile()
+  sys.setprofile(self.callback)
+  return self
+
+def __exit__(self, *args):
+  sys.setprofile(self.old_cb)
+```
+
+---
+
+## Coletando Chamadas
+
+```
+def __init__(self):
+  self.calls = set()
+
+def callback(self, frame, event, arg):
+  if event == 'call':
+    caller = frame.f_back.f_code.co_name
+    callee = frame.f_code.co_name
+    self.calls.add((caller, callee))
+```
+
+---
+
+## Resultado Preliminar
+
+![](img/cg-part.png)
+
+---
+
+## Identificando Métodos
+
+```
+def frame2name(frame):
+  code = frame.f_code
+  name = code.co_name
+  if code.co_argcount:
+    arg0 = code.co_varnames[0]
+    self = frame.f_locals[arg0]
+    mtd = getattr(self, name, None)
+    if hasattr(mtd, "__func__"):
+      if mtd.__func__.__code__ is code:
+        cls = type(self).__name__
+        name = "{}.{}".format(cls, name)
+  return name
+```
+
+---
+
+## Resultado
+
+![](img/cg-full.png)
+
+---
+
+## Casos de Uso
+
+- Grafo de Chamadas **✔** <!-- .element: style="color:green" -->
+- **Análise de Cobertura** **⇦** <!-- .element: style="color:red" -->
+- Profiler (perfilador)
+- Depurador
+
+---
+
+## Análise de Cobertura
+
+...
+
+**OBJETIVO**: visualizar quais linhas são executadas.
+
+---
+
+## Contexto para Instrumentar Linhas
+
+```
+def __enter__(self):
+  self.old_cb = sys.gettrace()
+  sys.settrace(self.callback)
+  return self
+
+def __exit__(self, *args):
+  sys.settrace(self.old_cb)
+```
+
+---
+
+## Coletando Linhas Executadas
+
+```
+def __init__(self):
+  self.covered = {}
+
+def callback(self, frame, event, arg):
+  if event == 'line':
+    fname = frame.f_code.co_filename
+    lineno = frame.f_lineno
+    s = self.covered.get(fname, set())
+    s.add(lineno)
+    self.covered[fname] = s
+  return self.callback
+```
+
+---
+
+## Resultado
+
+![](img/cover.png)
+
+---
+
+## Casos de Uso
+
+- Grafo de Chamadas **✔** <!-- .element: style="color:green" -->
+- Análise de Cobertura **✔** <!-- .element: style="color:green" -->
+- **Profiler (perfilador)** **⇦** <!-- .element: style="color:red" -->
+- Depurador
+
+---
+
+## Profiler
+
+...
+
+**OBJETIVO**: medir o desempenho de cada parte do código.
+
+---
+
+## Coletando Desempenho de Funções
+
+```
+def __init__(self, instrument):
+  self.instrument = instrument
+  self.stack = []
+  self.traces = {}
+```
+
+---
+
+## Coletando Desempenho de Funções
+
+```
+def callback(self, frame, event, arg):
+  file = frame.f_code.co_filename
+  if file == __file__ or file[0] in "</":
+    return
+  if event == 'call':
+    self.push()
+  elif event == 'return':
+    func = frame2name(frame)
+    key = (file, func)
+    self.pop(key)
+```
+
+---
+
+## Coletando Desempenho de Funções
+
+```
+def push(self):
+    before = self.instrument()
+    self.stack.append(before)
+
+def pop(self, key):
+    after = self.instrument()
+    before = self.stack.pop()
+    delta = after - before
+    trace = self.traces.get(key, [])
+    trace.append(delta)
+    self.traces[key] = trace
+```
+
+---
+
+## Resultado
+
+![](img/prof2.png)
+
+---
+
+## Casos de Uso
+
+- Grafo de Chamadas **✔** <!-- .element: style="color:green" -->
+- Análise de Cobertura **✔** <!-- .element: style="color:green" -->
+- Profiler (perfilador) **✔** <!-- .element: style="color:green" -->
+- **Depurador** **⇦** <!-- .element: style="color:red" -->
+
+---
+
+## Depurador
+
+...
+
+**OBJETIVO**: inspecionar a execução do código passo-a-passo.
+
+---
+
+## Linha de Comando
+
+```
+def prompt(self, globs=None, locs=None):
+  while True:
+    args = input("> ").split() or args
+    cmd = args.pop(0)
+    if "break".startswith(cmd):
+      self.breaks.add(int(args[0]))
+    elif "continue".startswith(cmd):
+      self.state = "cont"
+      break
+    ...
+    else:
+      print("tente outra vez")
+```
+
+---
+
+## Callback para Evento "trace"
+
+```
+def callback(self, frame, event, arg):
+  ...
+  if event == 'line':
+    if self.state == "cont":
+      if lineno in self.breaks:
+        print(lineno, line.rstrip())
+        self.prompt(globs, locs)
+    elif self.state == "step":
+      print(lineno, line.rstrip())
+      self.prompt(globs, locs)
+  return self.callback
+```
+
+---
+
+## Resultado
+
+![](img/dbg.png)
+
+---
+
+## Casos de Uso
+
+- Grafo de Chamadas **✔** <!-- .element: style="color:green" -->
+- Análise de Cobertura **✔** <!-- .element: style="color:green" -->
+- Profiler (perfilador) **✔** <!-- .element: style="color:green" -->
+- Depurador **✔** <!-- .element: style="color:green" -->
+
+--
+
+## GOTO Considerado Possível
+
+...
+
+**OBJETIVO**: implementar o comando que está faltando no Python.
+
+--
+
+## O Começo
+
+```
+def goto(x):
+  return x
+```
+
+--
+
+## O Truque
+
+```
+def localtrace(self, frame, event, arg):
+  if event == 'return':
+    if frame.f_code.co_name == 'goto':
+      self.target = arg
+  elif event == 'line':
+    if self.target is not None:
+      frame.f_lineno = self.target
+      self.target = None
+  return self.localtrace
+```
+
+--
+
+## O Teste
+
+```
+ 1: # BASIC MODE
+ 2: from goto import goto
+ 3:
+ 4: def main():
+ 5:   i = 1
+ 6:   print(i)
+ 7:   i += 1
+ 8:   if i <= 5:
+ 9:     goto(6)
+10:   return
+11:
+12: main()
+```
+
+--
+
+## O Resultado
+
+![](img/goto.png)
+
+--
+
+## Sucesso!
+
+- Grafo de Chamadas **✔** <!-- .element: style="color:green" -->
+- Análise de Cobertura **✔** <!-- .element: style="color:green" -->
+- Profiler (perfilador) **✔** <!-- .element: style="color:green" -->
+- Depurador **✔** <!-- .element: style="color:green" -->
+
+# ...
+
+## **GOTO** **✔** <!-- .element: style="color:green" -->
+
+</script>
+</section>
+				<section>
+					<h2>Fim</h2>
+					<pre><code>
+  ___              _   _             ___ 
+ / _ \ _  _ ___ __| |_(_)___ _ _  __|__ \
+| (_) | || / -_|_-<  _| / _ \ ' \(_-< /_/
+ \__\_\\_,_\___/__/\__|_\___/_||_/__/(_) 
+                                         
+					</code></pre>
+					<p><a href="https://github.com/lecram">github.com/lecram</a></p>
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: false,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
