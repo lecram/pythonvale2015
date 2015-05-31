@@ -2,7 +2,13 @@
 
 ## Slides
 
-Os slides que utilizei na apresentação estão no arquivo `slides-short.pdf`. O arquivo `slides-full.pdf` é uma versão extendida, com alguns detalhes a mais e uma demo extra.
+### PDF
+
+Os slides que utilizei na apresentação estão no arquivo `slides-short.pdf`. O arquivo `slides-full.pdf` é uma versão extendida, com mais detalhes e uma demo extra.
+
+### Online
+
+Os slides podem ser vistos em http://lecram.github.io/pythonvale2015 . Note que em algumas partes é possível navegar para baixo para ver o conteúdo extra.
 
 ## Código Fonte
 
